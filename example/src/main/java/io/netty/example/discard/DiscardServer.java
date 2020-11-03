@@ -17,6 +17,7 @@ package io.netty.example.discard;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
@@ -47,7 +48,9 @@ public final class DiscardServer {
             sslCtx = null;
         }
 
+        //reactor-boss线程，负责连接
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
+        //reactor-work线程，服务数据读写
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
             ServerBootstrap b = new ServerBootstrap();
@@ -67,7 +70,18 @@ public final class DiscardServer {
 
             // Bind and start to accept incoming connections.
             ChannelFuture f = b.bind(PORT).sync();
-
+            System.out.println("bind:"+PORT);
+            f.addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture future) throws Exception {
+                    if(future.isSuccess()){
+                        System.out.println("future is success");
+                    }else{
+                        System.out.println("future is ....");
+                    }
+                }
+            });
+            System.out.println("sync="+f.isSuccess());
             // Wait until the server socket is closed.
             // In this example, this does not happen, but you can do that to gracefully
             // shut down your server.

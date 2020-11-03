@@ -15,8 +15,10 @@
  */
 package io.netty.example.discard;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.util.CharsetUtil;
 
 /**
  * Handles a server-side channel.
@@ -26,6 +28,13 @@ public class DiscardServerHandler extends SimpleChannelInboundHandler<Object> {
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
         // discard
+
+//        int e1 = ctx.channel().eventLoop().hashCode();
+//        System.out.println("e1="+e1);
+//        int e2 = ctx.executor().hashCode();
+//        System.out.println("e2="+e2);
+        ByteBuf byteBuf = (ByteBuf) msg;
+        System.out.println("收到消息："+byteBuf.readableBytes());
     }
 
     @Override

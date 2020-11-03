@@ -46,7 +46,7 @@ public final class DiscardClient {
         } else {
             sslCtx = null;
         }
-
+        //NioEventLoopGroup客户端/服务端相同的类
         EventLoopGroup group = new NioEventLoopGroup();
         try {
             Bootstrap b = new Bootstrap();

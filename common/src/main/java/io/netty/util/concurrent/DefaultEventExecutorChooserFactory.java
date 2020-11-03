@@ -39,6 +39,9 @@ public final class DefaultEventExecutorChooserFactory implements EventExecutorCh
         }
     }
 
+    /**
+     * 是二的幂
+     */
     private static boolean isPowerOfTwo(int val) {
         return (val & -val) == val;
     }

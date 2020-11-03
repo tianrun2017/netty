@@ -127,21 +127,26 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
         return this;
     }
 
+    /**
+     * 初始化 服务端 NioServerSocketChannel
+     * @param channel NioServerSocketChannel
+     */
     @Override
     void init(Channel channel) {
         setChannelOptions(channel, newOptionsArray(), logger);
         setAttributes(channel, attrs0().entrySet().toArray(EMPTY_ATTRIBUTE_ARRAY));
-
+        //这个是NioServerSocketChannel的pipeline
         ChannelPipeline p = channel.pipeline();
-
+        //工作线程组
         final EventLoopGroup currentChildGroup = childGroup;
+        //子ChannelInitializer，服务客户端的读写
         final ChannelHandler currentChildHandler = childHandler;
         final Entry<ChannelOption<?>, Object>[] currentChildOptions;
         synchronized (childOptions) {
             currentChildOptions = childOptions.entrySet().toArray(EMPTY_OPTION_ARRAY);
         }
         final Entry<AttributeKey<?>, Object>[] currentChildAttrs = childAttrs.entrySet().toArray(EMPTY_ATTRIBUTE_ARRAY);
-
+        //服务端pipeline默认添加handler和异步开启处理客户端事件
         p.addLast(new ChannelInitializer<Channel>() {
             @Override
             public void initChannel(final Channel ch) {
@@ -207,14 +212,18 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
         @Override
         @SuppressWarnings("unchecked")
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
+            //child=NioSocketChannel
             final Channel child = (Channel) msg;
 
+            //把自定义的ChannelInitializer的添加的handler设置到NioSocketChannel的pipeline
             child.pipeline().addLast(childHandler);
 
             setChannelOptions(child, childOptions, logger);
             setAttributes(child, childAttrs);
 
             try {
+                //childGroup=workerGroup工作线程组
+                //child=NioSocketChannel
                 childGroup.register(child).addListener(new ChannelFutureListener() {
                     @Override
                     public void operationComplete(ChannelFuture future) throws Exception {
